@@ -1,0 +1,13 @@
+{
+  "name": "oneworld-ai-app",
+  "version": "0.2.0",
+  "private": true,
+  "description": "OneWorld AI starter application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
