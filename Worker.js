@@ -52,8 +52,11 @@ export default {
       const result = await response.json();
 
       if (!response.ok) {
-        return json({ error: "Gemini gagal memproses pesan." }, 502);
-      }
+  return json({
+    error: "Gemini API Error",
+    details: result
+  }, 502);
+}
 
       const reply = result.candidates?.[0]?.content?.parts
         ?.map(part => part.text || "").join("");
