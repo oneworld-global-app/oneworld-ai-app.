@@ -6,22 +6,23 @@ export default {
       "Access-Control-Allow-Headers": "Content-Type"
     };
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: cors });
-    }
-
     const json = (data, status = 200) =>
       new Response(JSON.stringify(data), {
         status,
         headers: { ...cors, "Content-Type": "application/json" }
       });
 
-    if (new URL(request.url).pathname === "/api/health") {
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: cors });
+    }
+
+    const url = new URL(request.url);
+
+    if (url.pathname === "/api/health") {
       return json({ status: "ok", app: "OneWorld" });
     }
 
-    if (request.method !== "POST" ||
-        new URL(request.url).pathname !== "/api/chat") {
+    if (request.method !== "POST" || url.pathname !== "/api/chat") {
       return json({ error: "Not found" }, 404);
     }
 
