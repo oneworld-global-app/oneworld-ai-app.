@@ -22,7 +22,10 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/health") {
-      return json({ status: "ok", app: "OneWorld" });
+      return json({
+        status: "ok",
+        app: "OneWorld"
+      });
     }
 
     if (request.method !== "POST" || url.pathname !== "/api/chat") {
@@ -38,7 +41,9 @@ export default {
       }
 
       if (!env.GEMINI_API_KEY) {
-        return json({ error: "API Key Gemini belum terpasang." }, 500);
+        return json({
+          error: "API Key Gemini belum terpasang."
+        }, 500);
       }
 
       const response = await fetch(
@@ -50,9 +55,9 @@ export default {
             "x-goog-api-key": env.GEMINI_API_KEY
           },
           body: JSON.stringify({
-  systemInstruction: {
-    parts: [{
-      text: `Kamu adalah OneWorld AI, asisten kecerdasan buatan global.
+            systemInstruction: {
+              parts: [{
+                text: `Kamu adalah OneWorld AI, asisten kecerdasan buatan global.
 
 Nama: OneWorld AI.
 Tujuan: Membantu semua orang di seluruh dunia.
@@ -68,15 +73,8 @@ Aturan:
 - Jawab menggunakan bahasa pengguna.
 - Bersikap ramah dan sopan.
 - Berikan jawaban yang jelas dan akurat.`
-    }]
-  },
-  contents: [
-    {
-      role: "user",
-      parts: [{ text: message }]
-    }
-  ]
-}),
+              }]
+            },
             contents: [
               {
                 role: "user",
@@ -103,9 +101,8 @@ Aturan:
 
         return json({
           error: "Gemini API Error",
-details: result,
-httpStatus: response.status
-          
+          details: result,
+          httpStatus: response.status
         }, 502);
       }
 
