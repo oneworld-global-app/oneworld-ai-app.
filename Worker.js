@@ -43,11 +43,14 @@ export default {
         return json({ error: "Pesan masih kosong." }, 400);
       }
 
-      if (!env.GEMINI_API_KEY) {
-        return json({
-          error: "API key belum terpasang."
-        }, 500);
-      }
+      if (!response.ok) {
+  console.error("GEMINI ERROR:", JSON.stringify(result));
+
+  return json({
+    error: "Gemini API Error",
+    details: result
+  }, 502);
+}
 
       const response = await fetch(
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
