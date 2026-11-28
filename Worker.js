@@ -2,14 +2,17 @@ export default {
   async fetch(request, env) {
     const cors = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type"
     };
 
     const json = (data, status = 200) =>
       new Response(JSON.stringify(data), {
         status,
-        headers: { ...cors, "Content-Type": "application/json" }
+        headers: {
+          ...cors,
+          "Content-Type": "application/json"
+        }
       });
 
     if (request.method === "OPTIONS") {
@@ -19,10 +22,16 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/health") {
-      return json({ status: "ok", app: "OneWorld" });
+      return json({
+        status: "ok",
+        app: "OneWorld"
+      });
     }
 
-    if (request.method !== "POST" || url.pathname !== "/api/chat") {
+    if (
+      request.method !== "POST" ||
+      url.pathname !== "/api/chat"
+    ) {
       return json({ error: "Not found" }, 404);
     }
 
@@ -30,9 +39,14 @@ export default {
       const body = await request.json();
       const message = String(body.message || "").trim();
 
-      if (!message) return json({ error: "Pesan masih kosong." }, 400);
+      if (!message) {
+        return json({ error: "Pesan masih kosong." }, 400);
+      }
+
       if (!env.GEMINI_API_KEY) {
-        return json({ error: "API key belum terpasang." }, 500);
+        return json({
+          error: "API key belum terpasang."
+        }, 500);
       }
 
       const response = await fetch(
@@ -44,26 +58,56 @@ export default {
             "x-goog-api-key": env.GEMINI_API_KEY
           },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: message }] }]
-          })
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: message }]
+              }
+            ]
+          }),
+          signal: AbortSignal.timeout(30000)
         }
       );
 
-      const result = await response.json();
+      const raw = await response.text();
+
+      let result;
+
+      try {
+        result = JSON.parse(raw);
+      } catch {
+        result = { message: raw };
+      }
 
       if (!response.ok) {
-  return json({
-    error: "Gemini API Error",
-    details: result
-  }, 502);
-}
+        return json({
+          error: "Gemini API Error",
+          details: result
+        }, 502);
+      }
 
       const reply = result.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || "").join("");
+        ?.map(part => part.text || "")
+        .join("");
 
-      return json({ reply: reply || "Belum ada jawaban dari AI." });
+      if (!reply) {
+        return json({
+          error: "Gemini tidak memberikan jawaban.",
+          details: result.promptFeedback || null
+        }, 502);
+      }
+
+      return json({
+        status: "success",
+        app: "OneWorld",
+        reply: reply
+      });
+
     } catch (error) {
-      return json({ error: "Terjadi kesalahan pada server." }, 500);
+      return json({
+        error: "Terjadi kesalahan pada server.",
+        details: String(error.message || error)
+      }, 500);
     }
   }
 };
