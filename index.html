@@ -38,7 +38,7 @@
           body: JSON.stringify({ message: document.getElementById("message").value })
         });
         const data = await response.json();
-        reply.textContent = data.reply || data.error || "Terjadi kesalahan.";
+        reply.textContent = data.reply || JSON.stringify(data, null, 2) || "Terjadi kesalahan.";
       } catch {
         reply.textContent = "Tidak dapat terhubung ke server.";
       }
