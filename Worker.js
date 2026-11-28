@@ -103,7 +103,9 @@ Aturan:
 
         return json({
           error: "Gemini API Error",
-          details: result
+details: result,
+httpStatus: response.status
+          
         }, 502);
       }
 
