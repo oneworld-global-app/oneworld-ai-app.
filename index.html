@@ -1,57 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneWorld AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #101827;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 650px;
+      background: #1b293d;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 10px 40px #0005;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #b9c7d9;
+      line-height: 1.5;
+    }
+
+    #reply {
+      background: #101827;
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 180px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.6;
+      margin: 20px 0;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #52627a;
+      background: #101827;
+      color: white;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #4f8cff;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    footer {
+      text-align: center;
+      color: #8495aa;
+      font-size: 12px;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+
+<body>
+
+<main>
+
+  <h1>🌍 OneWorld AI</h1>
+
+  <p class="subtitle">
+    Satu dunia, satu kecerdasan buatan.
+    Asisten AI untuk membantu semua orang.
+  </p>
+
+  <div id="reply" aria-live="polite">
+    Halo! Selamat datang di OneWorld AI.
+    Ada yang bisa saya bantu hari ini?
+  </div>
+
+  <form id="chat-form">
+
+    <textarea
+      id="message"
+      placeholder="Tulis pertanyaanmu di sini..."
+      required
+    ></textarea>
+
+    <button id="send-button" type="submit">
+      Kirim Pesan
+    </button>
+
+  </form>
+
+  <footer>
+    OneWorld AI © 2026
+  </footer>
+
+</main>
+
 <script>
-const form = document.getElementById("chat-form");
-const reply = document.getElementById("reply");
-const messageInput = document.getElementById("message");
-const button = form.querySelector("button");
+  const form = document.getElementById("chat-form");
+  const reply = document.getElementById("reply");
+  const messageInput = document.getElementById("message");
+  const button = document.getElementById("send-button");
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
+  form.addEventListener("submit", async function(event) {
+    event.preventDefault();
 
-  const message = messageInput.value.trim();
+    const message = messageInput.value.trim();
 
-  if (!message) {
-    reply.textContent = "Silakan tulis pesan terlebih dahulu.";
-    return;
-  }
+    if (!message) {
+      reply.textContent = "Silakan tulis pesan terlebih dahulu.";
+      return;
+    }
 
-  button.disabled = true;
-  reply.textContent = "OneWorld sedang berpikir...";
-
-  try {
-    const response = await fetch(
-      "https://late-sea-9f2b.ramsonmanalu28.workers.dev/api/chat",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: message
-        })
-      }
-    );
-
-    const raw = await response.text();
-    let data;
+    button.disabled = true;
+    reply.textContent = "OneWorld AI sedang berpikir...";
 
     try {
-      data = JSON.parse(raw);
-    } catch {
-      data = { error: raw };
-    }
+      const response = await fetch(
+        "https://late-sea-9f2b.ramsonmanalu28.workers.dev/api/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: message
+          })
+        }
+      );
 
-    if (!response.ok) {
-      reply.textContent = JSON.stringify(data, null, 2);
-    } else {
+      const raw = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = { error: raw };
+      }
+
+      if (!response.ok) {
+        reply.textContent = JSON.stringify(data, null, 2);
+      } else {
+        reply.textContent =
+          data.reply || JSON.stringify(data, null, 2);
+      }
+
+      if (response.ok) {
+        messageInput.value = "";
+      }
+
+    } catch (error) {
       reply.textContent =
-        data.reply || JSON.stringify(data, null, 2);
+        "Koneksi gagal: " + error.message;
+
+    } finally {
+      button.disabled = false;
     }
-
-  } catch (error) {
-    reply.textContent = "Koneksi gagal: " + error.message;
-
-  } finally {
-    button.disabled = false;
-  }
-});
+  });
 </script>
+
+</body>
+</html>
