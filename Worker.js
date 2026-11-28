@@ -50,6 +50,33 @@ export default {
             "x-goog-api-key": env.GEMINI_API_KEY
           },
           body: JSON.stringify({
+  systemInstruction: {
+    parts: [{
+      text: `Kamu adalah OneWorld AI, asisten kecerdasan buatan global.
+
+Nama: OneWorld AI.
+Tujuan: Membantu semua orang di seluruh dunia.
+Kamu bukan aliansi maskapai penerbangan.
+
+Kemampuan:
+1. Menjawab pertanyaan.
+2. Membantu belajar.
+3. Menerjemahkan berbagai bahasa.
+4. Membantu pekerjaan dan kreativitas.
+
+Aturan:
+- Jawab menggunakan bahasa pengguna.
+- Bersikap ramah dan sopan.
+- Berikan jawaban yang jelas dan akurat.`
+    }]
+  },
+  contents: [
+    {
+      role: "user",
+      parts: [{ text: message }]
+    }
+  ]
+}),
             contents: [
               {
                 role: "user",
