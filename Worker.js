@@ -22,16 +22,10 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/health") {
-      return json({
-        status: "ok",
-        app: "OneWorld"
-      });
+      return json({ status: "ok", app: "OneWorld" });
     }
 
-    if (
-      request.method !== "POST" ||
-      url.pathname !== "/api/chat"
-    ) {
+    if (request.method !== "POST" || url.pathname !== "/api/chat") {
       return json({ error: "Not found" }, 404);
     }
 
@@ -43,14 +37,9 @@ export default {
         return json({ error: "Pesan masih kosong." }, 400);
       }
 
-      if (!response.ok) {
-  console.error("GEMINI ERROR:", JSON.stringify(result));
-
-  return json({
-    error: "Gemini API Error",
-    details: result
-  }, 502);
-}
+      if (!env.GEMINI_API_KEY) {
+        return json({ error: "API Key Gemini belum terpasang." }, 500);
+      }
 
       const response = await fetch(
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
@@ -83,6 +72,8 @@ export default {
       }
 
       if (!response.ok) {
+        console.error("GEMINI ERROR:", JSON.stringify(result));
+
         return json({
           error: "Gemini API Error",
           details: result
@@ -103,10 +94,12 @@ export default {
       return json({
         status: "success",
         app: "OneWorld",
-        reply: reply
+        reply
       });
 
     } catch (error) {
+      console.error("SERVER ERROR:", error);
+
       return json({
         error: "Terjadi kesalahan pada server.",
         details: String(error.message || error)
